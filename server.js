@@ -12,7 +12,7 @@ server.listen(process.env.PORT || 3030, () => {
 
 const peerServer = ExpressPeerServer(server, {
     debug: true,
-    path: "/peerjs"
+    path: "/"
 });
 
 app.set("view engine", "ejs");
