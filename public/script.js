@@ -47,11 +47,10 @@ navigator.mediaDevices.getUserMedia({
 
     socket.on("user-disconnected", (userId) => {
         if(peers[userId]) peers[userId].close();
-        speakText(`user ${userId} leaved`);
     });
 
     document.addEventListener("keydown", (e) => {
-        if(e.which === 13 && chatInputBox.value != "") {
+        if(e.key === 13 && chatInputBox.value != "") {
             socket.emit("message", {
                 msg: chatInputBox.value,
                 user: currentUserId,
@@ -83,7 +82,7 @@ navigator.mediaDevices.getUserMedia({
             li.classList.add("otherUser");
             li.innerHTML = `<div><b>User (<small>${message.user}</small>): </b>${message.msg}</div>`;
         } else {
-            li.innerHTML = `<div><b>Me: </b>${message.msg}</div>`;
+            li.innerHTML = `<div><b>나 : </b>${message.msg}</div>`;
         }
 
         all_messages.append(li);
@@ -122,11 +121,11 @@ socket.on("disconnect", () => {
 
 const connectToNewUser = (userId, stream) => {
     var call = peer.call(userId, stream);
-    console.log(call);
+    console.log("call : " + call);
     var video = document.createElement("video");
 
     call.on("stream", (userVideoStream) => {
-      console.log(userVideoStream);
+      console.log("stream : " + userVideoStream);
       addVideoStream(video, userVideoStream, userId);
     });
 
