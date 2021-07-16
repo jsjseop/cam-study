@@ -176,24 +176,24 @@ const muteUnmute = () => {
 
 const setPlayVideo = () => {
     const html = `<i class="unmute fa fa-pause-circle"></i>
-    <span class="unmute">Resume Video</span>`;
+    <span class="unmute">해제</span>`;
     document.getElementById("playPauseVideo").innerHTML = html;
 };
   
 const setStopVideo = () => {
     const html = `<i class=" fa fa-video-camera"></i>
-    <span class="">Pause Video</span>`;
+    <span class="">정지</span>`;
     document.getElementById("playPauseVideo").innerHTML = html;
 };
   
 const setUnmuteButton = () => {
     const html = `<i class="unmute fa fa-microphone-slash"></i>
-    <span class="unmute">Unmute</span>`;
+    <span class="unmute">해제</span>`;
     document.getElementById("muteButton").innerHTML = html;
 };
 const setMuteButton = () => {
     const html = `<i class="fa fa-microphone"></i>
-    <span>Mute</span>`;
+    <span>음소거</span>`;
     document.getElementById("muteButton").innerHTML = html;
 };
 
@@ -222,17 +222,6 @@ const copyToClipboard = () => {
 const ShowChat = (e) => {
     e.classList.toggle("active");
     document.body.classList.toggle("showChat");
-};
-
-const playChatSount = () => {
-    const chatAudio = document.getElementById("chatAudio");
-    chatAudio.play();
-};
-
-const speakText = (msgTxt) => {
-    var msg = new SpeechSynthesisUtterance();
-    msg.text = msgTxt;
-    window.speechSynthesis.speak(msg);
 };
 
 

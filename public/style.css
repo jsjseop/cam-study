@@ -20,7 +20,7 @@ body {
 }
 video {
   display: block;
-  flex: 1;
+  flex: 1 1 40%;
   object-fit: cover;
   border: 5px solid #000;
   max-width: 600px;
@@ -33,7 +33,7 @@ video {
 .main__left {
   flex: 0.8;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 .main__right {
   flex: 0.2;
@@ -41,7 +41,6 @@ video {
   flex-direction: column;
   background-color: #242324;
   border-left: 1px solid #3d3d42;
-  display: none;
 }
 .showChat .main__right {
     display: flex;
@@ -51,6 +50,7 @@ video {
 }
 .main__videos {
   flex-grow: 1;
+  flex-direction: column;
   background-color: #000;
   display: flex;
   align-items: center;
@@ -58,6 +58,7 @@ video {
 }
 .main__controls {
   display: flex;
+  flex-direction: column;
   background-color: #1c1e20;
   color: #d2d2d2;
   padding: 5px;
@@ -65,6 +66,7 @@ video {
 }
 .main__controls_block {
   display: flex;
+  flex-direction: column;
 }
 .main__controls_button {
   display: flex;
@@ -86,10 +88,9 @@ video {
   background-color: #34383b;
 }
 .main__controls_button i {
-  font-size: 25px;
+  font-size: 20px;
 }
-.leaveMeeting {
-  background-color: red;
+#leave_meeting {
   color: #fff;
 }
 .main__header {
@@ -164,7 +165,13 @@ video {
     cursor: pointer;
     color: #fff;
 }
-
+.invitePopup {
+  display: none;
+}
+.showInvite .invitePopup {
+  display: flex;
+  background-color: #000;
+}
 @media (max-width: 640px) {
     .main__controls {
         position: fixed;
@@ -175,9 +182,7 @@ video {
     .main__controls_button span {
         display : none;
     }
-    #leave-meeting {
-        display: none;
-    }
+
     .showChat .main__right {
         display: flex;
         position: fixed;
@@ -197,4 +202,34 @@ video {
         justify-content: flex-start;
         align-items: initial;
     }
+}
+
+.box{
+  display: flex;
+  flex-direction: row;
+  width: 200px;
+  height: 100px;
+}
+.timerBox{
+  width: 200px;
+  outline: 2px solid black;
+}
+.timerBox .time{
+  font-size: 30pt;
+  padding-top: 8px;
+  color: #4C4C4C;
+  text-align: center;
+  font-family: sans-serif;
+}
+.btnBox{
+  display: flex;
+  flex-direction: row;
+  margin: 20px auto;
+  text-align: center;
+}
+.btnBox .fa{
+  margin: 0px 5px;
+  font-size: 30pt;
+  color: #fff;
+  cursor: pointer;
 }
