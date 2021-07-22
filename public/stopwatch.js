@@ -28,7 +28,7 @@ function stopButton(){
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({email: currentUserEmail,
-                            studyNo: ROOM_ID,
+                            studyNo: studyNo,
                             learningTime: learningTime})
     }).catch(error => console.error("error : "+error));
   }
