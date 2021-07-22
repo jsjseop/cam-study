@@ -54,7 +54,7 @@ navigator.mediaDevices.getUserMedia({
         if(e.which == 13 && chatInputBox.value != "") {
             socket.emit("message", {
                 msg: chatInputBox.value,
-                user: currentUserId,
+                user: currentUserNickname,
             });
             chatInputBox.value = "";
         }
@@ -64,7 +64,7 @@ navigator.mediaDevices.getUserMedia({
         if(chatInputBox.value != "") {
             socket.emit("message", {
                 msg: chatInputBox.value,
-                user: currentUserId,
+                user: currentUserNickname,
             });
             chatInputBox.value = "";
         }
@@ -73,7 +73,7 @@ navigator.mediaDevices.getUserMedia({
     socket.on("createMessage", (message) => {
         console.log(message);
         let li = document.createElement("li");
-        if (message.user != currentUserId) {
+        if (message.user != currentUserNickname) {
             li.classList.add("otherUser");
             li.innerHTML = `<div><b>User (<small>${message.user}</small>): </b>${message.msg}</div>`;
         } else {
@@ -95,20 +95,6 @@ $(function(){
             currentUserEmail = json.email;
             currentUserNickname = json.nickname;
         });
-});
-
-peer.on("call", function (call) {
-    getUserMedia({
-        video: true, audio: true
-    }, function(stream){
-        call.answer(stream);
-        const video = document.createElement("video");
-        call.on("stream", function (remoteStream) {
-            addVideoStream(video, remoteStream);
-        });
-    }, function(err) {
-        console.log("Failed to get local stream", err);
-    });
 });
 
 peer.on("open", (id) => {
@@ -217,7 +203,12 @@ const copyToClipboard = () => {
 const shareScreen = async ()=> {
     let captureStream= null;
     try {
-      captureStream= await navigator.mediaDevices.getDisplayMedia();
+      navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: true
+      }),then(stream => {
+          addVideoStream(cu)
+      })
     } catch (err) {
       console.error("Error: " + err);
     }
