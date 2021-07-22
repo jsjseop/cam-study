@@ -4,93 +4,177 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>OGong</title>
+    <base href="/">
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
     />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.3.2/peerjs.min.js.map"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script type="text/javascript" src="stopwatch.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const ROOM_ID = "<%= roomId %>";
+        const studyNo = "<%= roomId %>";
+        const email = "<%= email %>";
     </script>
 </head>
 <body>
-    <div class="overlay" onclick="hideInvitePopup()"></div>
-    <div class="invitePopup">
-      <input type="text" value="..." id="roomLink" readonly>
-      <button onclick="copyToClipboard()">Copy</button>
-    </div>
     <div class="main">
-        <div class="main__left">
-            <div class="main__controls">
-                <div class="main__controls_block">
-                  <div
-                    class="main__controls_button"
-                    id="muteButton"
-                    onclick="muteUnmute()"
-                  >
-                    <i class="fa fa-microphone"></i>
-                    <span>음소거</span>
-                  </div>
-                  <div
-                    class="main__controls_button"
-                    id="playPauseVideo"
-                    onclick="playStop()"
-                  >
-                    <i class="fa fa-video-camera"></i>
-                    <span>정지</span>
-                  </div>
-                  <div class="main__controls_button" onclick="showInvitePopup()">
-                    <i class="fa fa-user-plus"></i>
-                    <span>초대</span>
-                  </div>
-                </div>
-                <div class="main_controls_block">
-                  <div class="main__controls_button"
-                      id="leave_meeting"> 
-                      <i class="glyphicon glyphicon-arrow-left" aria-hidden="true"></i>
-                      <span>나가기</span>
-                  </div>
-                </div>
+      <div class="main__left">
+        <div class="main__controls">
+          <div class="main__controls_block">
+            <div
+              class="main__controls_button"
+              id="ogongButton">
+              <i class="fa fa-circle-o"></i>
+              <span>오공</span>
             </div>
-            <div class="main__videos">
-              <div id="video-grid"></div>
+            <div class="main__controls_button"
+              id="muteButton"
+              onclick="muteUnmute()">
+              <i class="fa fa-microphone"></i>
+              <span>음소거</span>
+            </div>
+            <div class="main__controls_button"
+              id="playPauseVideo"
+              onclick="playStop()">
+              <i class="fa fa-video-camera"></i>
+              <span>정지</span>
+            </div>
+            <div class="main__controls_button"
+              id="shareScreen"
+              onclick="shareScreen()">
+              <i class="fa fa-video-camera"></i>
+              <span>화면공유</span>
+            </div>
+          </div>
 
-              <div id='box' class="box">
-                <div id='timerBox' class="timerBox">
-                  <div id="time" class="time">00:00:00</div>
-                </div>
-                <div class="btnBox">
-                  <i id="startbtn" class="fa fa-play" aria-hidden="true"></i>
-                  <i id="pausebtn" class="fa fa-pause" aria-hidden="true"></i>
-                  <i id="stopbtn" class="fa fa-stop" aria-hidden="true"></i>
+          <div class="main__controls_block">
+            <div class="main__controls_button" id="memberList"
+                 data-toggle="modal" data-target="#memberListModal">
+              <i class="fa fa-users"></i>
+              <span>참여자</span>
+            </div>
+            <div class="main__controls_button" data-toggle="modal" data-target="#inviteModal">
+              <i class="fa fa-user-plus"></i>
+              <span>초대</span>
+            </div>
+
+            <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">초대하기</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="invitePopup">
+                      <input type="text" value="http://localhost:5050/<%=roomId%>" id="roomLink" readonly>
+                      <button onclick="copyToClipboard()">링크복사</button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <div class="modal fade" id="memberListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">참여자 목록</h4>
+                  </div>
+                  <table class="table table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>닉네임</th>
+                        <th>입장시간</th>
+                        <th>공부명</th>
+                        <th>공부시간</th>
+                        <th>누적공부시간</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="main__controls_button"
+                id="leave_study"> 
+                <i class="glyphicon glyphicon-arrow-left" aria-hidden="true"></i>
+                <span>나가기</span>
+            </div>
+          </div>
         </div>
-        <div class="main__right">
-            <div class="main__header">
-                <h6><span class="live"></span>채팅방</h6>
+        <div class="main__videos">
+          <div id="video-grid"></div>
+
+          <div class="bottombox">
+            <div class="studyType">
+              <button type="button" id="typeName" class="btn btn-lg" data-toggle="modal" data-target="#myModal">
+                공부
+              </button>
             </div>
-            <div class="main__chat__window" id="main__chat__window">
-                <ul class="messages" id="all_messages"></ul>
+
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">공부명 변경</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <input type="text" class="form-control" id="inputType" placeholder="공부명">
+                      </br><p>공부명 변경시 공부시간이 초기화 됩니다.</p>
+                      <button type="button" id="changeBtn" class="btn btn-primary" data-dismiss="modal">변경</button>
+                      <button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="main__message_container">
-                <input
-                  type="text"
-                  id="chat_message"
-                  placeholder="메시지를 입력해주세요.."
-                />
-                <button class="sendMsg" id="sendMsg">
-                    <i class="fa fa-paper-plane"></i>
-                </button>
+
+            <div class="timerBox">
+              <div id="time" class="time">00:00:00</div>
             </div>
+            <div class="btnBox">
+              <i id="startbtn" class="fa fa-play" aria-hidden="true"></i>
+              <i id="pausebtn" class="fa fa-pause" aria-hidden="true"></i>
+              <i id="stopbtn" class="fa fa-stop" aria-hidden="true"></i>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="main__right">
+          <div class="main__header">
+              <h5><span class="live"></span>채팅방</h5>
+          </div>
+          <div class="main__chat__window" id="main__chat__window">
+              <ul class="messages" id="all_messages"></ul>
+          </div>
+          <div class="main__message_container">
+              <input
+                type="text"
+                id="chat_message"
+                placeholder="메시지를 입력해주세요.."
+              />
+              <button class="sendMsg" id="sendMsg">
+                  <i class="fa fa-paper-plane"></i>
+              </button>
+          </div>
+      </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

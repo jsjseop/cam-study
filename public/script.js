@@ -1,21 +1,22 @@
 const socket = io("/");
 const chatInputBox = document.getElementById("chat_message");
 const all_messages = document.getElementById("all_messages");
-const leave_meetion = document.getElementById("leave-meeting");
 const main__chat__window = document.getElementById("main__chat__window");
 const videoGrid = document.getElementById("video-grid");
 const myVideo = document.createElement("video");
 myVideo.muted = true;
 
-
 var peer = new Peer(undefined, {
     path: "/peer",
     host: "/",
-    port: "443"
+    port: "3030"
   });
 
 let myVideoStream;
 let currentUserId;
+let currentUserEmail;
+let currentUserNickname;
+let link;
 let pendingMsg = 0;
 let peers = {};
 var getUserMedia = navigator.getUserMedia ||
@@ -50,7 +51,7 @@ navigator.mediaDevices.getUserMedia({
     });
 
     document.addEventListener("keydown", (e) => {
-        if(e.key === 13 && chatInputBox.value != "") {
+        if(e.which == 13 && chatInputBox.value != "") {
             socket.emit("message", {
                 msg: chatInputBox.value,
                 user: currentUserId,
@@ -69,12 +70,6 @@ navigator.mediaDevices.getUserMedia({
         }
     });
 
-    chatInputBox.addEventListener("focus", () => {
-        document.getElementById("chat__Btn").classList.remove("has__new");
-        pendingMsg = 0;
-        document.getElementById("chat__Btn").children[1].innerHTML = "Chat";
-    });
-
     socket.on("createMessage", (message) => {
         console.log(message);
         let li = document.createElement("li");
@@ -87,13 +82,19 @@ navigator.mediaDevices.getUserMedia({
 
         all_messages.append(li);
         main__chat__window.scrollTop = main__chat__window.scrollHeight;
-        if(message.user != currentUserId) {
-            pendingMsg++;
-            playChatSound();
-            document.getElementById("chat__Btn").classList.add("has__new");
-            document.getElementById("chat__Btn").children[1].innerHTML = `CHAT (${pendingMsg})`;
-        }
     });
+});
+
+$(function(){
+    console.log(email);
+
+    fetch("http://127.0.0.1:5050/cam/json/getUser/"+email)
+        .then(res => res.json())
+        .then(json => {
+            console.log(json);
+            currentUserEmail = json.email;
+            currentUserNickname = json.nickname;
+        });
 });
 
 peer.on("call", function (call) {
@@ -112,11 +113,11 @@ peer.on("call", function (call) {
 
 peer.on("open", (id) => {
     currentUserId = id;
-    socket.emit("join-room", ROOM_ID, id);
+    socket.emit("join-room", studyNo, id);
 });
 
 socket.on("disconnect", () => {
-    socket.emit("leave-room", ROOM_ID, currentUserId);
+    socket.emit("leave-room", studyNo, currentUserId);
 });
 
 const connectToNewUser = (userId, stream) => {
@@ -197,13 +198,8 @@ const setMuteButton = () => {
     document.getElementById("muteButton").innerHTML = html;
 };
 
-const showInvitePopup = () => {
-    document.body.classList.add("showInvite");
+const copyRoomLink = () => {
     document.getElementById("roomLink").value = window.location.href;
-};
-
-const hideInvitePopup = () => {
-    document.body.classList.remove("showInvite");
 };
 
 const copyToClipboard = () => {
@@ -214,14 +210,135 @@ const copyToClipboard = () => {
 
     document.execCommand("copy");
 
-    alert("Copied: " + copyText.value);
-
-    hideInvitePopup();
+    toastr.success("복사완료 : " + copyText.value);
 }
 
-const ShowChat = (e) => {
-    e.classList.toggle("active");
-    document.body.classList.toggle("showChat");
+
+const shareScreen = async ()=> {
+    let captureStream= null;
+    try {
+      captureStream= await navigator.mediaDevices.getDisplayMedia();
+    } catch (err) {
+      console.error("Error: " + err);
+    }
+    //connectToNewUser(currentUserId, captureStream);
+    myPeer.call(currentUserId, captureStream);
 };
 
 
+var list = [];
+
+$("#memberList").on("click", () => {
+    
+    fetch("http://127.0.0.1:5050/cam/json/getCamStudyMemberList/"+studyNo,{
+        method: "get"
+    }).then(res => res.json())
+    .then(json => {
+        $('#tableBody').empty();
+        json.forEach((el) => {
+            var memberList = '<tr>'
+                                +'<td>'+el.nickname+'</td>'
+                                +'<td>'+el.entranceTime+'</td>'
+                                +'<td>'+el.learningType+'</td>'
+                                +'<td>'+el.learningTime+'</td>'
+                                +'<td>'+el.totalLearningTime+'</td>'
+                            +'</tr>';
+            $('#tableBody').append(memberList);
+        });
+    });
+});
+
+$("#changeBtn").on("click", function(){
+    var typeName = $("#typeName").html().trim();
+    var inputType = $("#inputType").val();
+    var learningtime = document.getElementById("time").innerHTML;
+
+    if(inputType.length >= 1 && inputType.length <= 8){
+        if(typeName == inputType){
+            toastr.warning('공부명이 같습니다.');
+        }else{
+            function updateTime(){
+                return new Promise((resolve) => {
+                    fetch("http://127.0.0.1:5050/cam/json/addLearningHistory/",{
+                        method: "post",
+                        headers: {
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({email: currentUserEmail,
+                                            studyNo: studyNo,
+                                            learningType: typeName})
+                    }).then(() => {
+                        fetch("http://127.0.0.1:5050/cam/json/updateCamStudyMemberZero/",{
+                            method: "post",
+                            headers: {
+                            'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({email: currentUserEmail,
+                                                studyNo: studyNo,
+                                                learningType: inputType})
+                        }).catch(error => console.error("error : "+error));
+                        $("#typeName").html(inputType);
+                    });
+                    resolve("200");
+                })
+            }
+    
+            async function changeType(){
+                await stopButton();
+                await updateTime();
+            }
+            console.log(learningtime);
+            if(learningtime != '00:00:00'){
+                changeType();
+            }else{
+                fetch("http://127.0.0.1:5050/cam/json/updateCamStudyMemberZero/",{
+                    method: "post",
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({email: currentUserEmail,
+                                        studyNo: studyNo,
+                                        learningType: inputType})
+                }).catch(error => console.error("error : "+error));
+                $("#typeName").html(inputType);
+            }
+    
+        }
+    }else{
+        toastr.error("공부명은 8자까지 입력가능합니다.")
+    }
+
+    
+});
+
+$("#leave_study").on("click", () => {
+    var typeName = $("#typeName").html().trim();
+    function leaveStudy(){
+        return new Promise(function(resolve, reject){
+            $('#stopbtn').click();
+            resolve();
+        })
+    }
+    leaveStudy().then(() => {
+        fetch("http://127.0.0.1:5050/selfStudy/leaveStudy/",{
+            method: "post",
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({email: currentUserEmail,
+                                studyNo: studyNo,
+                                learningType: typeName})
+        }).then(res => res.json())
+        .then(json => {
+            console.log(json);
+            link = json.email;
+            location.replace(link);
+        });
+    })
+    
+});
+
+// const ShowChat = (e) => {
+//     e.classList.toggle("active");
+//     document.body.classList.toggle("showChat");
+// };
