@@ -222,7 +222,7 @@ const shareScreen = async ()=> {
       console.error("Error: " + err);
     }
     //connectToNewUser(currentUserId, captureStream);
-    myPeer.call(currentUserId, captureStream);
+    peer.call(currentUserId, captureStream);
 };
 
 
