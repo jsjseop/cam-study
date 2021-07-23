@@ -4,7 +4,7 @@ const all_messages = document.getElementById("all_messages");
 const main__chat__window = document.getElementById("main__chat__window");
 const videoGrid = document.getElementById("video-grid");
 const myVideo = document.createElement("video");
-myVideo.muted = true;
+myVideo.muted = false;
 
 var peer = new Peer(undefined, {
     path: "/peer",
@@ -16,7 +16,7 @@ let myVideoStream;
 let currentUserId;
 let currentUserEmail;
 let currentUserNickname;
-let link;
+let leaveFlag = false;
 let pendingMsg = 0;
 let peers = {};
 var getUserMedia = navigator.getUserMedia ||
@@ -307,6 +307,7 @@ $("#leave_study").on("click", () => {
     function leaveStudy(){
         return new Promise(function(resolve, reject){
             $('#stopbtn').click();
+            leaveFlag = true;
             resolve();
         })
     }
@@ -326,26 +327,29 @@ $("#leave_study").on("click", () => {
     
 });
 
-$(window).on("beforeunload", (e) => {
-    var typeName = $("#typeName").html().trim();
-    function leaveStudy(){
-        return new Promise(function(resolve, reject){
-            $('#stopbtn').click();
-            resolve();
-        })
-    }
-    leaveStudy().then(() => {
-        fetch("http://127.0.0.1:5050/selfStudy/leaveStudy/",{
-            method: "post",
-            headers: {
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({email: currentUserEmail,
-                                studyNo: studyNo,
-                                learningType: typeName})
+if(leaveFlag == false){
+    $(window).on("beforeunload", (e) => {
+        var typeName = $("#typeName").html().trim();
+        function leaveStudy(){
+            return new Promise(function(resolve, reject){
+                $('#stopbtn').click();
+                resolve();
+            })
+        }
+        leaveStudy().then(() => {
+            fetch("http://127.0.0.1:5050/selfStudy/leaveStudy/",{
+                method: "post",
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({email: currentUserEmail,
+                                    studyNo: studyNo,
+                                    learningType: typeName})
+            });
         });
-    })
-})
+    });
+}
+
 
 // const ShowChat = (e) => {
 //     e.classList.toggle("active");
