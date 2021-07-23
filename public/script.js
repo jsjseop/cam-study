@@ -319,11 +319,8 @@ $("#leave_study").on("click", () => {
             body: JSON.stringify({email: currentUserEmail,
                                 studyNo: studyNo,
                                 learningType: typeName})
-        }).then(res => res.json())
-        .then(json => {
-            console.log(json);
-            link = json.email;
-            location.replace(link);
+        }).then(() => {
+            window.close();
         });
     })
     
@@ -346,11 +343,6 @@ $(window).on("beforeunload", (e) => {
             body: JSON.stringify({email: currentUserEmail,
                                 studyNo: studyNo,
                                 learningType: typeName})
-        }).then(res => res.json())
-        .then(json => {
-            console.log(json);
-            link = json.email;
-            location.replace(link);
         });
     })
 })
