@@ -329,6 +329,32 @@ $("#leave_study").on("click", () => {
     
 });
 
+$(window).on("beforeunload", (e) => {
+    var typeName = $("#typeName").html().trim();
+    function leaveStudy(){
+        return new Promise(function(resolve, reject){
+            $('#stopbtn').click();
+            resolve();
+        })
+    }
+    leaveStudy().then(() => {
+        fetch("http://127.0.0.1:5050/selfStudy/leaveStudy/",{
+            method: "post",
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({email: currentUserEmail,
+                                studyNo: studyNo,
+                                learningType: typeName})
+        }).then(res => res.json())
+        .then(json => {
+            console.log(json);
+            link = json.email;
+            location.replace(link);
+        });
+    })
+})
+
 // const ShowChat = (e) => {
 //     e.classList.toggle("active");
 //     document.body.classList.toggle("showChat");
