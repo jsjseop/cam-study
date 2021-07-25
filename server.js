@@ -46,5 +46,10 @@ io.on("connection", (socket) => {
       socket.on("disconnect", () => {
         socket.broadcast.to(roomId).emit("user-disconnected", userId);
       });
+
+      socket.on("share-disconnect",(shareId) => {
+        socket.broadcast.to(roomId).emit("share-disconnected", shareId);
+      })
     });
+    
 });

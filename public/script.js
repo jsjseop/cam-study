@@ -4,7 +4,11 @@ const all_messages = document.getElementById("all_messages");
 const main__chat__window = document.getElementById("main__chat__window");
 const videoGrid = document.getElementById("video-grid");
 const myVideo = document.createElement("video");
-myVideo.muted = false;
+const screenShare = document.getElementById("share");
+document.addEventListener('contextmenu', function() {
+    event.preventDefault();
+});
+myVideo.muted = true;
 
 var peer = new Peer(undefined, {
     path: "/peer",
@@ -13,12 +17,14 @@ var peer = new Peer(undefined, {
   });
 
 let myVideoStream;
+let shareId;
 let currentUserId;
 let currentUserEmail;
 let currentUserNickname;
 let leaveFlag = false;
 let pendingMsg = 0;
 let peers = {};
+let peerList = [];
 var getUserMedia = navigator.getUserMedia ||
                     navigator.webkitGetUserMedia ||
                     navigator.mozGetUserMedia;
@@ -35,19 +41,62 @@ navigator.mediaDevices.getUserMedia({
 
         call.on("stream", (userVideoStream) => {
             addVideoStream(video, userVideoStream);
-            console.log(peers);
         });
 
+        call.on("close", () => {
+            video.remove();
+        });
+
+        peerList.push(call.peer);
+        peers[call.peer] = call;
     });
 
+    $("#shareScreen").on("click", () => {
+        var peer = new Peer(undefined, {
+            path: "/peer",
+            host: "/",
+            port: "443"
+        });
+        var shareVideo = document.createElement("video");
+        var call = [];
+        try {
+          navigator.mediaDevices.getDisplayMedia({
+              video: true,
+              audio: true
+          }).then((captureStream) => {
+            addVideoStream(shareVideo, captureStream, "share");
+            
+            peerList.forEach(function(value, i){
+                call[i] = peer.call(value, captureStream);
+                
+            });
+            
+            $('#share').on('suspend', ()=>{
+                $('#share').remove();
+                for(var i=0; i<call.length; i++){
+                    socket.emit("share-disconnect",call[i].peer);
+                    call[i].close();
+                }
+            });
+          });
+        } catch (err) {
+          console.error("Error: " + err);
+        }    
+    })
+
     socket.on("user-connected", (userId) => {
+        
         setTimeout(() => {
-            connectToNewUser(userId, stream)
+            connectToNewUser(userId, stream, currentUserNickname)
           },1000)
     });
 
     socket.on("user-disconnected", (userId) => {
         if(peers[userId]) peers[userId].close();
+    });
+
+    socket.on("share-disconnected", (shareId) => {
+        peers[peerList[peerList.length-1]].close();
     });
 
     document.addEventListener("keydown", (e) => {
@@ -106,29 +155,31 @@ socket.on("disconnect", () => {
     socket.emit("leave-room", studyNo, currentUserId);
 });
 
-const connectToNewUser = (userId, stream) => {
+const connectToNewUser = (userId, stream, currentUserNickname) => {
     var call = peer.call(userId, stream);
-    console.log("call : " + call);
     var video = document.createElement("video");
 
+    console.log("닉네임 : " + currentUserNickname);
+
     call.on("stream", (userVideoStream) => {
-      console.log("stream : " + userVideoStream);
       addVideoStream(video, userVideoStream, userId);
     });
 
     call.on("close", () => {
         video.remove();
     });
+    peerList.push(userId);
     peers[userId] = call;
 };
 
 const addVideoStream = (videoEl, stream, uId) => {
+    
     videoEl.srcObject = stream;
     videoEl.id = uId;
     videoEl.addEventListener("loadedmetadata", () => {
-      videoEl.play();
+        videoEl.play();        
     });
-  
+
     videoGrid.append(videoEl);
     let totalUsers = document.getElementsByTagName("video").length;
     if (totalUsers > 1) {
@@ -137,6 +188,39 @@ const addVideoStream = (videoEl, stream, uId) => {
           100 / totalUsers + "%";
       }
     }
+
+    $('video').on('mousedown', (e) => {
+        if(e.which === 3){
+            swal("화면삭제","화면을 삭제하시겠습니까?",{
+                buttons:{
+                    remove: {
+                        text: "삭제",
+                        value: "remove",
+                    },
+                    cancel: "취소"
+                },
+            })
+            .then((value)=>{
+                switch(value){
+                    case "remove":
+                        e.target.remove();
+                        break;
+                }
+            })
+        }
+    })
+
+    var flag = false;
+    $('video').on("dblclick", function(){
+        if(flag == false){
+            $(this).css('transform','scale(3)');
+            flag = true;
+        } else {
+            $(this).css('transform','scale(1)');
+            flag = false;
+        }
+        
+    })
 };
 
 const playStop = () => {
@@ -196,25 +280,11 @@ const copyToClipboard = () => {
 
     document.execCommand("copy");
 
-    toastr.success("복사완료 : " + copyText.value);
+    swal("","복사완료 : " + copyText.value,"success");
 }
 
 
-const shareScreen = async ()=> {
-    let captureStream= null;
-    try {
-      navigator.mediaDevices.getDisplayMedia({
-          video: true,
-          audio: true
-      }),then(stream => {
-          addVideoStream(cu)
-      })
-    } catch (err) {
-      console.error("Error: " + err);
-    }
-    //connectToNewUser(currentUserId, captureStream);
-    peer.call(currentUserId, captureStream);
-};
+
 
 
 var list = [];
@@ -239,6 +309,7 @@ $("#memberList").on("click", () => {
     });
 });
 
+
 $("#changeBtn").on("click", function(){
     var typeName = $("#typeName").html().trim();
     var inputType = $("#inputType").val();
@@ -246,7 +317,7 @@ $("#changeBtn").on("click", function(){
 
     if(inputType.length >= 1 && inputType.length <= 8){
         if(typeName == inputType){
-            toastr.warning('공부명이 같습니다.');
+            swal('공부명이 같습니다.','...','warning');
         }else{
             function updateTime(){
                 return new Promise((resolve) => {
@@ -296,7 +367,7 @@ $("#changeBtn").on("click", function(){
     
         }
     }else{
-        toastr.error("공부명은 8자까지 입력가능합니다.")
+        swal("공부명은 8자까지 입력가능합니다.","","error");
     }
 
     
@@ -350,8 +421,15 @@ if(leaveFlag == false){
     });
 }
 
-
-// const ShowChat = (e) => {
-//     e.classList.toggle("active");
-//     document.body.classList.toggle("showChat");
-// };
+$('#ogongButton').on('click', ()=>{
+    fetch("http://127.0.0.1:5050/cam/json/getStudy/"+studyNo)
+        .then(res => res.json())
+        .then(json => {
+            console.log(json);
+            $('#studyName').val(json.studyName);
+            $('#studyInterest').val(json.studyInterest);
+            $('#maxMember').val(json.maxMember+"명");
+            $('#selfStudyRule').val(json.selfStudyRule);
+            $('#studyDate').val(json.studyStartDate+" ~ "+json.studyEndDate);
+        });
+})

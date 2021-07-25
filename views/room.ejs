@@ -18,6 +18,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.3.2/peerjs.min.js.map"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script type="text/javascript" src="stopwatch.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -31,9 +32,8 @@
       <div class="main__left">
         <div class="main__controls">
           <div class="main__controls_block">
-            <div
-              class="main__controls_button"
-              id="ogongButton">
+            <div class="main__controls_button" id="ogongButton"
+                 data-toggle="modal" data-target="#studyInfoModal">
               <i class="fa fa-circle-o"></i>
               <span>오공</span>
             </div>
@@ -50,9 +50,8 @@
               <span>정지</span>
             </div>
             <div class="main__controls_button"
-              id="shareScreen"
-              onclick="shareScreen()">
-              <i class="fa fa-video-camera"></i>
+              id="shareScreen">
+              <i class="fa fa-desktop"></i>
               <span>화면공유</span>
             </div>
           </div>
@@ -66,6 +65,56 @@
             <div class="main__controls_button" data-toggle="modal" data-target="#inviteModal">
               <i class="fa fa-user-plus"></i>
               <span>초대</span>
+            </div>
+
+            <div class="modal fade" id="studyInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title text-center" id="myModalLabel">스터디 정보</h4>
+                  </div>
+                  <br/>
+                  <form class="form-horizontal">
+                    
+                    <div class="form-group">
+                      <label class="col-sm-offset-1 col-sm-3 control-label">스터디명</label>
+                      <div class="col-sm-5">
+                        <input type="text" class="form-control" id="studyName" value="" readonly>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="col-sm-offset-1 col-sm-3 control-label">관심주제</label>
+                      <div class="col-sm-5">
+                        <input type="text" class="form-control" id="studyInterest" value="" readonly>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-sm-offset-1 col-sm-3 control-label">최대인원</label>
+                      <div class="col-sm-2">
+                        <input type="text" class="form-control" id="maxMember" value="" readonly>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="col-sm-offset-1 col-sm-3 control-label">규칙 및 공지사항</label>
+                      <div class="col-sm-6">
+                        <textarea class="form-control" rows="3" id="selfStudyRule" readonly></textarea>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-sm-offset-1 col-sm-3 control-label">진행기간</label>
+                      <div class="col-sm-6">
+                        <input type="text" class="form-control" id="studyDate" value="" readonly>
+                      </div>
+                    </div>
+                    
+                  </form>
+                </div>
+              </div>
             </div>
 
             <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
