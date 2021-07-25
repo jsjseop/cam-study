@@ -398,8 +398,8 @@ $("#leave_study").on("click", () => {
     
 });
 
-if(leaveFlag == false){
-    $(window).on("beforeunload", (e) => {
+$(window).on("beforeunload", (e) => {
+    if(leaveFlag == false){
         var typeName = $("#typeName").html().trim();
         function leaveStudy(){
             return new Promise(function(resolve, reject){
@@ -418,8 +418,8 @@ if(leaveFlag == false){
                                     learningType: typeName})
             });
         });
-    });
-}
+    }
+});
 
 $('#ogongButton').on('click', ()=>{
     fetch("http://127.0.0.1:5050/cam/json/getStudy/"+studyNo)
