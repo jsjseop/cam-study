@@ -383,7 +383,7 @@ $("#leave_study").on("click", () => {
         })
     }
     leaveStudy().then(() => {
-        fetch("http://127.0.0.1:5050/selfStudy/leaveStudy/",{
+        fetch("http://127.0.0.1:5050/study/leaveStudy/",{
             method: "post",
             headers: {
             'Content-Type': 'application/json'
@@ -408,7 +408,7 @@ $(window).on("beforeunload", (e) => {
             })
         }
         leaveStudy().then(() => {
-            fetch("http://127.0.0.1:5050/selfStudy/leaveStudy/",{
+            fetch("http://127.0.0.1:5050/study/leaveStudy/",{
                 method: "post",
                 headers: {
                 'Content-Type': 'application/json'
